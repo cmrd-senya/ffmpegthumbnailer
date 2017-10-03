@@ -21,6 +21,8 @@
 #include <stdexcept>
 #include <stdlib.h>
 #include <clocale>
+#include <string.h>
+#include <libgen.h>
 
 #ifdef ENABLE_GIO
 #include <dlfcn.h>
@@ -38,6 +40,26 @@ void printUsage();
 void tryUriConvert(std::string& filename);
 ThumbnailerImageType determineImageTypeFromString(const std::string& filename);
 ThumbnailerImageType determineImageTypeFromFilename(const std::string& filename);
+
+string getTempFileName(string outputFile, string suffix) {
+    if(outputFile == "-") {
+        return outputFile;
+    }
+
+    char *buffer1, *buffer2, *directoryName, *fileName;
+    buffer1 = strdup(outputFile.c_str());
+    buffer2 = strdup(outputFile.c_str());
+    directoryName = dirname(buffer1);
+    fileName = basename(buffer2);
+    string tmpFileName;
+    tmpFileName += directoryName;
+    tmpFileName += "/.";
+    tmpFileName += fileName;
+    tmpFileName += suffix;
+    free(buffer1);
+    free(buffer2);
+    return tmpFileName;
+}
 
 int main(int argc, char** argv)
 {
@@ -177,7 +199,8 @@ int main(int argc, char** argv)
         }
 
         do {
-            string tmpFileName = "." + outputFile + tmpFileNameSuffix;
+            string tmpFileName = getTempFileName(outputFile, tmpFileNameSuffix);
+
             videoThumbnailer.generateThumbnail(inputFile, imageType, tmpFileName);
             if (tmpFileNameSuffix.length() > 0)
             {
